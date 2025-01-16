@@ -5,11 +5,10 @@
 
 #define WND_TITLE "My application"
 
-int main(int argc, char* argv[])
-{
-    int scr_w = 640;
-    int scr_h = 480;
+SDL_Window* g_wnd;
 
+void init_screen(const char* wnd_title, int w, int h)
+{
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
         printf("Unable to initialize SDL: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
@@ -22,18 +21,26 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    SDL_SetStringProperty(wnd_props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, WND_TITLE);
-    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, scr_w);
-    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, scr_h);
+    SDL_SetStringProperty(wnd_props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, wnd_title);
+    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, w);
+    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, h);
     SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
     SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
 
-    SDL_Window* wnd = SDL_CreateWindowWithProperties(wnd_props);
+    SDL_Window* g_wnd = SDL_CreateWindowWithProperties(wnd_props);
 
-    if (!wnd) {
+    if (!g_wnd) {
         printf("Unable to create window: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
     }
+}
+
+int main(int argc, char* argv[])
+{
+    int scr_w = 640;
+    int scr_h = 480;
+
+    init_screen(WND_TITLE, scr_w, scr_h);
 
     SDL_Event event;
 
@@ -53,7 +60,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    SDL_DestroyWindow(wnd);
+    SDL_DestroyWindow(g_wnd);
 
     return EXIT_SUCCESS;
 }
