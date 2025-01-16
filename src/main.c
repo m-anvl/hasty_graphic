@@ -35,7 +35,23 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    SDL_Delay(10000);
+    SDL_Event event;
+
+    while (true) {
+
+        if (SDL_PollEvent(&event)) {
+
+            if (event.type == SDL_EVENT_QUIT)
+                break;
+
+            if (event.type == SDL_EVENT_KEY_DOWN) {
+
+                if (event.key.key == SDLK_ESCAPE) {
+                    break;
+                }
+            }
+        }
+    }
 
     SDL_DestroyWindow(wnd);
 
