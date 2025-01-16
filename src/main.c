@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 
     SDL_PropertiesID wnd_props = SDL_CreateProperties();
     if (!wnd_props) {
-        printf("Unable to create properties: %s", SDL_GetError());
+        printf("Unable to create properties: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
     SDL_Window* wnd = SDL_CreateWindowWithProperties(wnd_props);
 
     if (!wnd) {
-        printf("Unable to create window: %s", SDL_GetError());
+        printf("Unable to create window: %s\n", SDL_GetError());
         exit(EXIT_FAILURE);
     }
 
