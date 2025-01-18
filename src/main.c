@@ -9,6 +9,7 @@
 #define WND_TITLE "My application"
 
 SDL_Window* g_wnd;
+SDL_Renderer* g_rndr;
 
 void init_screen(const char* wnd_title, int w, int h)
 {
@@ -36,6 +37,16 @@ void init_screen(const char* wnd_title, int w, int h)
         ERR_SDL(SDL_CreateWindowWithProperties);
         exit(EXIT_FAILURE);
     }
+
+    g_rndr = SDL_CreateRenderer(g_wnd, NULL);
+
+    if (!g_rndr) {
+        ERR_SDL(SDL_CreateRenderer);
+        exit(EXIT_FAILURE);
+    }
+
+    /* Set black color for renderer */
+    SDL_SetRenderDrawColor(g_rndr, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
 }
 
 int main(int argc, char* argv[])
@@ -60,9 +71,13 @@ int main(int argc, char* argv[])
                     break;
                 }
             }
-        }
+        } /* End of event handling */
+
+        SDL_RenderClear(g_rndr);
+        SDL_RenderPresent(g_rndr);
     }
 
+    SDL_DestroyRenderer(g_rndr);
     SDL_DestroyWindow(g_wnd);
 
     return EXIT_SUCCESS;
