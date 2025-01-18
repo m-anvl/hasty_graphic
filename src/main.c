@@ -56,6 +56,20 @@ int main(int argc, char* argv[])
 
     init_screen(WND_TITLE, scr_w, scr_h);
 
+    SDL_Texture* back_buffer_texture = SDL_CreateTexture(g_rndr, SDL_PIXELFORMAT_ABGR8888,
+        SDL_TEXTUREACCESS_STREAMING, scr_w, scr_h);
+    if (!back_buffer_texture) {
+        ERR_SDL(SDL_CreateTexture);
+        exit(EXIT_FAILURE);
+    }
+
+    uint32_t* back_buffer = malloc(sizeof(*back_buffer) * scr_h * scr_w);
+    if (!back_buffer) {
+        fprintf(stderr, "[%s:%d] Back buffer don\'t created\n", __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
+    }
+    memset(back_buffer, 0, (size_t)scr_w * scr_h);
+
     SDL_Event event;
 
     while (true) {
@@ -73,10 +87,18 @@ int main(int argc, char* argv[])
             }
         } /* End of event handling */
 
+        SDL_UpdateTexture(back_buffer_texture, NULL, back_buffer, scr_w * 4);
         SDL_RenderClear(g_rndr);
+        SDL_RenderTexture(g_rndr, back_buffer_texture, NULL, NULL);
         SDL_RenderPresent(g_rndr);
     }
 
+    if (back_buffer) {
+        free(back_buffer);
+        back_buffer = NULL;
+    }
+
+    SDL_DestroyTexture(back_buffer_texture);
     SDL_DestroyRenderer(g_rndr);
     SDL_DestroyWindow(g_wnd);
 
