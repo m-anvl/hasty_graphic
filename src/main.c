@@ -30,7 +30,7 @@ void init_screen(const char* wnd_title, int w, int h)
     SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
     SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
 
-    SDL_Window* g_wnd = SDL_CreateWindowWithProperties(wnd_props);
+    g_wnd = SDL_CreateWindowWithProperties(wnd_props);
 
     if (!g_wnd) {
         ERR_SDL(SDL_CreateWindowWithProperties);
