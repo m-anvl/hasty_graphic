@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include <SDL3/SDL.h>
 
+#define ERR_SDL(str) do { fprintf(stderr, "[%s:%d] %s error: %s\n",\
+                        __FILE__, __LINE__, #str, SDL_GetError()); } while(0)
+
 #define WND_TITLE "My application"
 
 SDL_Window* g_wnd;
@@ -10,14 +13,14 @@ SDL_Window* g_wnd;
 void init_screen(const char* wnd_title, int w, int h)
 {
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-        printf("Unable to initialize SDL: %s\n", SDL_GetError());
+        ERR_SDL(SDL_InitSubSystem);
         exit(EXIT_FAILURE);
     }
     atexit(SDL_Quit);
 
     SDL_PropertiesID wnd_props = SDL_CreateProperties();
     if (!wnd_props) {
-        printf("Unable to create properties: %s\n", SDL_GetError());
+        ERR_SDL(SDL_CreateProperties);
         exit(EXIT_FAILURE);
     }
 
@@ -30,7 +33,7 @@ void init_screen(const char* wnd_title, int w, int h)
     SDL_Window* g_wnd = SDL_CreateWindowWithProperties(wnd_props);
 
     if (!g_wnd) {
-        printf("Unable to create window: %s\n", SDL_GetError());
+        ERR_SDL(SDL_CreateWindowWithProperties);
         exit(EXIT_FAILURE);
     }
 }
