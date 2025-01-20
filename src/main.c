@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <SDL3/SDL.h>
 
 #define ERR_SDL(str) do { fprintf(stderr, "[%s:%d] %s error: %s\n",\
@@ -49,6 +50,12 @@ void init_screen(const char* wnd_title, int w, int h)
     SDL_SetRenderDrawColor(g_rndr, 0x00u, 0x00u, 0x00u, SDL_ALPHA_OPAQUE);
 }
 
+void shutdown_app(void)
+{
+    SDL_DestroyRenderer(g_rndr);
+    SDL_DestroyWindow(g_wnd);
+}
+
 int main(int argc, char* argv[])
 {
     int scr_w = 640;
@@ -79,6 +86,7 @@ int main(int argc, char* argv[])
 
     while (true) {
 
+        /* Event handling */
         if (SDL_PollEvent(&event)) {
 
             if (event.type == SDL_EVENT_QUIT)
@@ -104,8 +112,8 @@ int main(int argc, char* argv[])
     }
 
     SDL_DestroyTexture(back_buffer_texture);
-    SDL_DestroyRenderer(g_rndr);
-    SDL_DestroyWindow(g_wnd);
+
+    shutdown_app();
 
     return EXIT_SUCCESS;
 }
