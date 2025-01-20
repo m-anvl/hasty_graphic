@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "hasty_graphic.h"
 
 SDL_Window* g_wnd;
 SDL_Renderer* g_rndr;
+SDL_Texture* g_back_buffer_texture;
+uint32_t* g_back_buffer;
 
 void init_app(const char* wnd_title, int w, int h)
 {
@@ -41,10 +44,34 @@ void init_app(const char* wnd_title, int w, int h)
 
     /* Set black color for renderer */
     SDL_SetRenderDrawColor(g_rndr, 0x00u, 0x00u, 0x00u, SDL_ALPHA_OPAQUE);
+
+    g_back_buffer_texture = SDL_CreateTexture(g_rndr, SDL_PIXELFORMAT_ABGR8888,
+        SDL_TEXTUREACCESS_STREAMING, w, h);
+    if (!g_back_buffer_texture) {
+        ERR_SDL(SDL_CreateTexture);
+        exit(EXIT_FAILURE);
+    }
+
+    g_back_buffer = malloc(sizeof(*g_back_buffer) * w * h);
+    if (!g_back_buffer) {
+        fprintf(stderr, "[%s:%d] Back buffer don\'t created\n", __FILE__, __LINE__);
+        exit(EXIT_FAILURE);
+    }
 }
 
 void shutdown_app(void)
 {
+    if (g_back_buffer) {
+        free(g_back_buffer);
+        g_back_buffer = NULL;
+    }
+
+    SDL_DestroyTexture(g_back_buffer_texture);
+    g_back_buffer_texture = NULL;
+
     SDL_DestroyRenderer(g_rndr);
+    g_rndr = NULL;
+
     SDL_DestroyWindow(g_wnd);
+    g_wnd = NULL;
 }
