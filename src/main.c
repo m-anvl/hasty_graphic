@@ -46,13 +46,14 @@ void init_screen(const char* wnd_title, int w, int h)
     }
 
     /* Set black color for renderer */
-    SDL_SetRenderDrawColor(g_rndr, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(g_rndr, 0x00u, 0x00u, 0x00u, SDL_ALPHA_OPAQUE);
 }
 
 int main(int argc, char* argv[])
 {
     int scr_w = 640;
     int scr_h = 480;
+    int pitch = sizeof(uint32_t) * scr_w;
 
     init_screen(WND_TITLE, scr_w, scr_h);
 
@@ -68,7 +69,11 @@ int main(int argc, char* argv[])
         fprintf(stderr, "[%s:%d] Back buffer don\'t created\n", __FILE__, __LINE__);
         exit(EXIT_FAILURE);
     }
-    memset(back_buffer, 0, (size_t)scr_w * scr_h);
+
+    /* Fill back buffer one color */
+    for (size_t i = 0; i < (size_t)scr_h * scr_w; i++) {
+        back_buffer[i] = 0xff000000u; /* color pack - AA BB GG RR */
+    }
 
     SDL_Event event;
 
@@ -87,7 +92,7 @@ int main(int argc, char* argv[])
             }
         } /* End of event handling */
 
-        SDL_UpdateTexture(back_buffer_texture, NULL, back_buffer, scr_w * 4);
+        SDL_UpdateTexture(back_buffer_texture, NULL, back_buffer, pitch);
         SDL_RenderClear(g_rndr);
         SDL_RenderTexture(g_rndr, back_buffer_texture, NULL, NULL);
         SDL_RenderPresent(g_rndr);
