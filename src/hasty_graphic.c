@@ -1,21 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include "hasty_graphic.h"
 
 SDL_Window* g_wnd;
 SDL_Renderer* g_rndr;
 SDL_Texture* g_back_buffer_texture;
 uint32_t* g_back_buffer;
+int g_pitch;
 
-void init_app(const char* wnd_title, int w, int h)
+static void create_window(const char* wnd_title, int w, int h)
 {
-    if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-        ERR_SDL(SDL_InitSubSystem);
-        exit(EXIT_FAILURE);
-    }
-    atexit(SDL_Quit);
-
     SDL_PropertiesID wnd_props = SDL_CreateProperties();
     if (!wnd_props) {
         ERR_SDL(SDL_CreateProperties);
@@ -29,22 +21,14 @@ void init_app(const char* wnd_title, int w, int h)
     SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
 
     g_wnd = SDL_CreateWindowWithProperties(wnd_props);
-
     if (!g_wnd) {
         ERR_SDL(SDL_CreateWindowWithProperties);
         exit(EXIT_FAILURE);
     }
+}
 
-    g_rndr = SDL_CreateRenderer(g_wnd, NULL);
-
-    if (!g_rndr) {
-        ERR_SDL(SDL_CreateRenderer);
-        exit(EXIT_FAILURE);
-    }
-
-    /* Set black color for renderer */
-    SDL_SetRenderDrawColor(g_rndr, 0x00u, 0x00u, 0x00u, SDL_ALPHA_OPAQUE);
-
+static void create_back_buffer(int w, int h)
+{
     g_back_buffer_texture = SDL_CreateTexture(g_rndr, SDL_PIXELFORMAT_ABGR8888,
         SDL_TEXTUREACCESS_STREAMING, w, h);
     if (!g_back_buffer_texture) {
@@ -59,7 +43,31 @@ void init_app(const char* wnd_title, int w, int h)
     }
 }
 
-void shutdown_app(void)
+void init_graphics(const char* wnd_title, int w, int h)
+{
+    if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
+        ERR_SDL(SDL_InitSubSystem);
+        exit(EXIT_FAILURE);
+    }
+    atexit(SDL_Quit);
+
+    create_window(wnd_title, w, h);
+
+    g_rndr = SDL_CreateRenderer(g_wnd, NULL);
+    if (!g_rndr) {
+        ERR_SDL(SDL_CreateRenderer);
+        exit(EXIT_FAILURE);
+    }
+
+    /* Set black color for renderer */
+    SDL_SetRenderDrawColor(g_rndr, 0x00u, 0x00u, 0x00u, SDL_ALPHA_OPAQUE);
+
+    create_back_buffer(w, h);
+
+    g_pitch = sizeof(g_back_buffer[0]) * w;
+}
+
+void shutdown_graphics(void)
 {
     if (g_back_buffer) {
         free(g_back_buffer);
@@ -74,4 +82,12 @@ void shutdown_app(void)
 
     SDL_DestroyWindow(g_wnd);
     g_wnd = NULL;
+}
+
+void redraw_screen(void)
+{
+    SDL_UpdateTexture(g_back_buffer_texture, NULL, g_back_buffer, g_pitch);
+    SDL_RenderClear(g_rndr);
+    SDL_RenderTexture(g_rndr, g_back_buffer_texture, NULL, NULL);
+    SDL_RenderPresent(g_rndr);
 }
