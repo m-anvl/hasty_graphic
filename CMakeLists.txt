@@ -7,7 +7,7 @@ cmake ..
 cmake_minimum_required(VERSION 3.20)
 
 project(
-    set_pixel
+    hasty_graphic
     LANGUAGES C
 )
 
@@ -16,6 +16,8 @@ set(TRG_NAME ${PROJECT_NAME})
 add_executable(
     ${TRG_NAME}
     src/main.c
+    src/hasty_graphic.c
+    src/hasty_graphic.h
 )
 
 # Add SDL3
