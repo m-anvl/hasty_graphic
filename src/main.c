@@ -17,6 +17,8 @@ int main(int argc, char* argv[])
         g_back_buffer[i] = 0xff00ff00u; /* color pack - AA BB GG RR */
     }
 
+    set_pixel(scr_w / 3, scr_h / 2, 0xffff0000u);
+
     while (1) {
 
         /* Event handling */

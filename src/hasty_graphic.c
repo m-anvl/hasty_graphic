@@ -96,3 +96,8 @@ void redraw_screen(void)
     SDL_RenderTexture(g_rndr, g_back_buffer_texture, NULL, NULL);
     SDL_RenderPresent(g_rndr);
 }
+
+void set_pixel(int x, int y, uint32_t color)
+{
+    g_back_buffer[g_width * y + x] = color;
+}

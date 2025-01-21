@@ -18,6 +18,8 @@ void shutdown_graphics(void);
 
 void redraw_screen(void);
 
+void set_pixel(int x, int y, uint32_t color);
+
 #ifdef __cplusplus
 }
 #endif
