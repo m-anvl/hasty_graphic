@@ -5,8 +5,10 @@ SDL_Renderer* g_rndr;
 SDL_Texture* g_back_buffer_texture;
 uint32_t* g_back_buffer;
 int g_pitch;
+int g_width;
+int g_height;
 
-static void create_window(const char* wnd_title, int w, int h)
+static void create_window(const char* wnd_title)
 {
     SDL_PropertiesID wnd_props = SDL_CreateProperties();
     if (!wnd_props) {
@@ -15,8 +17,8 @@ static void create_window(const char* wnd_title, int w, int h)
     }
 
     SDL_SetStringProperty(wnd_props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, wnd_title);
-    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, w);
-    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, h);
+    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, g_width);
+    SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, g_height);
     SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
     SDL_SetNumberProperty(wnd_props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
 
@@ -27,16 +29,16 @@ static void create_window(const char* wnd_title, int w, int h)
     }
 }
 
-static void create_back_buffer(int w, int h)
+static void create_back_buffer(void)
 {
     g_back_buffer_texture = SDL_CreateTexture(g_rndr, SDL_PIXELFORMAT_ABGR8888,
-        SDL_TEXTUREACCESS_STREAMING, w, h);
+        SDL_TEXTUREACCESS_STREAMING, g_width, g_height);
     if (!g_back_buffer_texture) {
         ERR_SDL(SDL_CreateTexture);
         exit(EXIT_FAILURE);
     }
 
-    g_back_buffer = malloc(sizeof(*g_back_buffer) * w * h);
+    g_back_buffer = malloc(sizeof(*g_back_buffer) * g_width * g_height);
     if (!g_back_buffer) {
         fprintf(stderr, "[%s:%d] Back buffer don\'t created\n", __FILE__, __LINE__);
         exit(EXIT_FAILURE);
@@ -45,13 +47,16 @@ static void create_back_buffer(int w, int h)
 
 void init_graphics(const char* wnd_title, int w, int h)
 {
+    g_width = w;
+    g_height = h;
+
     if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
         ERR_SDL(SDL_InitSubSystem);
         exit(EXIT_FAILURE);
     }
     atexit(SDL_Quit);
 
-    create_window(wnd_title, w, h);
+    create_window(wnd_title);
 
     g_rndr = SDL_CreateRenderer(g_wnd, NULL);
     if (!g_rndr) {
@@ -62,9 +67,9 @@ void init_graphics(const char* wnd_title, int w, int h)
     /* Set black color for renderer */
     SDL_SetRenderDrawColor(g_rndr, 0x00u, 0x00u, 0x00u, SDL_ALPHA_OPAQUE);
 
-    create_back_buffer(w, h);
+    create_back_buffer();
 
-    g_pitch = sizeof(g_back_buffer[0]) * w;
+    g_pitch = sizeof(g_back_buffer[0]) * g_width;
 }
 
 void shutdown_graphics(void)
