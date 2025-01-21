@@ -105,3 +105,9 @@ void set_pixel(int x, int y, uint32_t color)
 
     g_back_buffer[g_width * y + x] = color;
 }
+
+void clear_back_buffer(uint32_t color)
+{
+    for (int i = 0; i < g_width * g_height; i++)
+        g_back_buffer[i] = color;
+}

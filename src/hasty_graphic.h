@@ -28,6 +28,7 @@ extern "C" {
 void init_graphics(const char* wnd_title, int w, int h);
 void shutdown_graphics(void);
 
+void clear_back_buffer(uint32_t color);
 void redraw_screen(void);
 
 void set_pixel(int x, int y, uint32_t color);
