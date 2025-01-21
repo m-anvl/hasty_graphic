@@ -99,5 +99,9 @@ void redraw_screen(void)
 
 void set_pixel(int x, int y, uint32_t color)
 {
+    if (x >= g_width || y >= g_height || x < 0 || y < 0) {
+        return;
+    }
+
     g_back_buffer[g_width * y + x] = color;
 }
