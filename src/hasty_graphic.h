@@ -33,6 +33,9 @@ void redraw_screen(void);
 
 void set_pixel(int x, int y, uint32_t color);
 
+uint32_t pack_color_rgb(const uint8_t r, const uint8_t g, const uint8_t b);
+uint32_t pack_color_rgba(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a);
+
 #ifdef __cplusplus
 }
 #endif

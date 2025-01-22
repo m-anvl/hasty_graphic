@@ -12,12 +12,24 @@ int main(int argc, char* argv[])
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
-    /* Fill back buffer one color */
-    for (size_t i = 0; i < (size_t)scr_h * scr_w; i++) {
-        g_back_buffer[i] = 0xff00ff00u; /* color pack - AA BB GG RR */
-    }
+    uint32_t v_color;
 
-    set_pixel(scr_w / 3, scr_h / 2, 0xffff0000u);
+    /* Pack the color A8B8G8*/
+    uint8_t red = 0xff;
+    uint8_t green = 0x00;
+    uint8_t blue = 0xff;
+    uint8_t alpha = 0xff;
+
+    v_color = (alpha << 24) + (blue << 16) + (green << 8) + red;
+
+    clear_back_buffer(v_color);
+
+    set_pixel(scr_w / 2, scr_h / 2, BLACK);
+
+    /* Draw line */
+    for (int i = 30; i < 80; i++) {
+        set_pixel(i, 26, YELLOW);
+    }
 
     while (1) {
 
@@ -31,6 +43,16 @@ int main(int argc, char* argv[])
 
                 if (event.key.key == SDLK_ESCAPE) {
                     break;
+                }
+                if (event.key.key == SDLK_B) {
+                    clear_back_buffer(BLUE);
+                }
+                if (event.key.key == SDLK_G) {
+                    clear_back_buffer(GREEN);
+                }
+                if (event.key.key == SDLK_R) {
+                    uint32_t color_red = pack_color_rgb(0xff, 0x00, 0x00);
+                    clear_back_buffer(color_red);
                 }
             }
         } /* End of event handling */

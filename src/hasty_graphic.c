@@ -111,3 +111,14 @@ void clear_back_buffer(uint32_t color)
     for (int i = 0; i < g_width * g_height; i++)
         g_back_buffer[i] = color;
 }
+
+uint32_t pack_color_rgb(const uint8_t r, const uint8_t g, const uint8_t b)
+{
+    /* alpha = 0xff */
+    return 0xff000000 + (b << 16) + (g << 8) + r;
+}
+
+uint32_t pack_color_rgba(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a)
+{
+    return (a << 24) + (b << 16) + (g << 8) + r;
+}
