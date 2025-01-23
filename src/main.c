@@ -12,24 +12,24 @@ int main(int argc, char* argv[])
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
-    uint32_t v_color;
-
-    /* Pack the color A8B8G8*/
-    uint8_t red = 0xff;
-    uint8_t green = 0x00;
-    uint8_t blue = 0xff;
-    uint8_t alpha = 0xff;
-
-    v_color = (alpha << 24) + (blue << 16) + (green << 8) + red;
-
-    clear_back_buffer(v_color);
-
-    set_pixel(scr_w / 2, scr_h / 2, BLACK);
-
     /* Draw line */
-    for (int i = 30; i < 80; i++) {
-        set_pixel(i, 26, YELLOW);
+    int x0 = 50, y0 = 20; /* start point of line */
+    int x1 = 200, y1 = 300; /* end point of line */
+
+    /* Calculate slope of line (m) */
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int m = dy/(float)dx; /* m = dy / dx */
+    
+    /* Start draw by first point */
+    int x = x0; int y = y0;
+    /* For every x - calculate y, and draw */
+    for (int i = 0; i < x1 - x0; i++) {
+        set_pixel(x, y, BLUE);
+        x++;
+        y += m;
     }
+
 
     while (1) {
 
