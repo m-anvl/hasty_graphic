@@ -1,4 +1,4 @@
-#include "hasty_primitives.h"
+#include "hasty_shapes.h"
 
 extern uint32_t* g_back_buffer;
 extern int g_width;

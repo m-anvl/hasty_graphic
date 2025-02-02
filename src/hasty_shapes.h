@@ -1,5 +1,5 @@
-#ifndef HASTY_PRIMITIVES_H_SENTRY
-#define HASTY_PRIMITIVES_H_SENTRY
+#ifndef HASTY_SHAPES_H_SENTRY
+#define HASTY_SHAPES_H_SENTRY
 
 #include "hasty_graphic.h"
 
@@ -15,4 +15,4 @@ void draw_line_v(int x, int y0, int y1, uint32_t color);
 }
 #endif
 
-#endif // !HASTY_PRIMITIVES_H_SENTRY
+#endif // !HASTY_SHAPES_H_SENTRY

@@ -1,5 +1,5 @@
 #include "hasty_graphic.h"
-#include "hasty_primitives.h"
+#include "hasty_shapes.h"
 
 #define WND_TITLE "My application"
 
