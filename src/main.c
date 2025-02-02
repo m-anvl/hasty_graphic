@@ -43,6 +43,9 @@ int main(int argc, char* argv[])
         draw_line_h(50, 150, 20, YELLOW);
         draw_line_h(50, 150, 200, RED);
         draw_line_v(50, 20, 200, BLACK);
+        draw_line_v(150, 20, 200, BLACK);
+        draw_line_h(650, 40, 300, MAGENTA);
+        draw_line_v(100, 500, 20, MAGENTA);
 
         redraw_screen();
     }

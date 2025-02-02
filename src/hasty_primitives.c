@@ -6,6 +6,13 @@ extern int g_height;
 
 void draw_line(int x0, int y0, int x1, int y1, uint32_t color)
 {
+    /* Check if the line is on the screen */
+    if (x0 < 0 || x0 > g_width - 1
+        || x1 < 0 || x1 > g_width - 1
+        || y0 < 0 || y0 > g_height - 1
+        || y1 < 0 || y1 > g_height - 1)
+        return;
+
     /* Bresenham's line algorithm */
 
     int dx, dy; /* deltas */
@@ -85,6 +92,25 @@ void draw_line(int x0, int y0, int x1, int y1, uint32_t color)
 
 void draw_line_h(int x0, int x1, int y, uint32_t color)
 {
+
+    /* Swap x0 and x1 for set correct endpoint */
+    if (x1 < x0) {
+        x0 += x1;
+        x1 = x0 - x1;
+        x0 -= x1;
+    }
+
+    /* Check if the line is on the screen */
+    if (x1 < 0 || x0 >= g_width || y < 0 || y >= g_height)
+        return;
+
+    /* Clip */
+    if (x0 < 0)
+        x0 = 0;
+
+    if (x1 >= g_width)
+        x1 = g_width - 1;
+
     /* Dummy method */
     for (int i = x0; i < x1; i++) {
         set_pixel(i, y, color);
@@ -93,6 +119,24 @@ void draw_line_h(int x0, int x1, int y, uint32_t color)
 
 void draw_line_v(int x, int y0, int y1, uint32_t color)
 {
+    /* Swap y0 and y1 for set correct endpoint */
+    if (y1 < y0) {
+        y0 += y1;
+        y1 = y0 - y1;
+        y0 -= y1;
+    }
+
+    /* Check if the line is on the screen */
+    if (x < 0 || x >= g_width || y1 < 0 || y0 >= g_height)
+        return;
+
+    /* Clip */
+    if (y0 < 0)
+        y0 = 0;
+
+    if (y1 >= g_height)
+        y1 = g_height - 1;
+
     /* Dummy method */
     for (int i = y0; i < y1; i++) {
         set_pixel(x, i, color);
