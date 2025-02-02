@@ -12,23 +12,84 @@ int main(int argc, char* argv[])
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
-    /* Draw line */
+    /* Bresenham's line algorithm */
     int x0 = 50, y0 = 20; /* start point of line */
-    int x1 = 200, y1 = 300; /* end point of line */
+    int x1 = 200, y1 = 400; /* end point of line */
+    uint32_t color_line = pack_color_rgb(0x00u, 0x00u, 0xffu);
+    int dx, dy; /* deltas */
+    int dx2, dy2; /* (dx, dy)x2 */
+    int x_dir, y_dir; /* steps */
+    int err_flag;
 
-    /* Calculate slope of line (m) */
-    int dx = x1 - x0;
-    int dy = y1 - y0;
-    int m = dy/(float)dx; /* m = dy / dx */
-    
-    /* Start draw by first point */
-    int x = x0; int y = y0;
-    /* For every x - calculate y, and draw */
-    for (int i = 0; i < x1 - x0; i++) {
-        set_pixel(x, y, BLUE);
-        x++;
-        y += m;
+    /* Calc start address in back buffer (for draw start point) */
+    uint32_t* bbuf_start = g_back_buffer + x0 + y0 * scr_w;
+    /* Calc deltas */
+    dx = x1 - x0;
+    dy = y1 - y0;
+
+    if (dx >= 0) {
+        x_dir = 1; /* Line direction - right */
     }
+    else {
+        x_dir = -1; /* left */
+        dx = -dx; /* need abs value */
+    }
+
+    if (dy >= 0) {
+        y_dir = scr_w; /* down */
+    }
+    else {
+        y_dir = -scr_w; /* up */
+        dy = -dy;
+    }
+
+    /* (dx, dy)x2 */
+    dx2 = dx << 1;
+    dy2 = dy << 1;
+
+    if (dx > dy) {
+        err_flag = dy2 - dx;
+
+        /* Draw line */
+        for (int i = 0; i <= dx; i++) {
+            /* draw pixel */
+            *bbuf_start = color_line;
+
+            /* Check error overflow */
+            if (err_flag >= 0) {
+                err_flag -= dx2;
+                /* next line */
+                bbuf_start += y_dir;
+            }
+
+            /*correct error */
+            err_flag += dy2;
+            /* go to next pixel */
+            bbuf_start += x_dir;
+        }
+    }
+    else {
+        err_flag = dx2 - dy;
+
+        /* draw line */
+        for (int i = 0; i <= dy; i++) {
+            /* draw pixel */
+            *bbuf_start = color_line;
+
+            /* Check error overflow */
+            if (err_flag >= 0) {
+                err_flag -= dy2;
+                /* next line */
+                bbuf_start += x_dir;
+            }
+
+            /*correct error */
+            err_flag += dx2;
+            /* go to next pixel */
+            bbuf_start += y_dir;
+        }
+    }
+
 
 
     while (1) {
