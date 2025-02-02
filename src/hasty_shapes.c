@@ -111,9 +111,16 @@ void draw_line_h(int x0, int x1, int y, uint32_t color)
     if (x1 >= g_width)
         x1 = g_width - 1;
 
-    /* Dummy method */
+#if 0 /* Dummy method */
     for (int i = x0; i < x1; i++) {
         set_pixel(i, y, color);
+    }
+#endif // 0
+
+    uint32_t* bbuf_start = g_back_buffer + x0 + y * g_width;
+    for (int i = x0; i <= x1; i++) {
+        *bbuf_start = color;
+        bbuf_start++;
     }
 }
 
@@ -137,8 +144,15 @@ void draw_line_v(int x, int y0, int y1, uint32_t color)
     if (y1 >= g_height)
         y1 = g_height - 1;
 
-    /* Dummy method */
+#if 0 /* Dummy method */
     for (int i = y0; i < y1; i++) {
         set_pixel(x, i, color);
+    }
+#endif // 0
+
+    uint32_t* bbuf_start = g_back_buffer + x + y0 * g_width;
+    for (int i = y0; i <= y1; i++) {
+        *bbuf_start = color;
+        bbuf_start += g_width;
     }
 }
