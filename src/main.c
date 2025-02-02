@@ -1,4 +1,5 @@
 #include "hasty_graphic.h"
+#include "hasty_primitives.h"
 
 #define WND_TITLE "My application"
 
@@ -11,86 +12,6 @@ int main(int argc, char* argv[])
     SDL_Event event;
 
     init_graphics(WND_TITLE, scr_w, scr_h);
-
-    /* Bresenham's line algorithm */
-    int x0 = 50, y0 = 20; /* start point of line */
-    int x1 = 200, y1 = 400; /* end point of line */
-    uint32_t color_line = pack_color_rgb(0x00u, 0x00u, 0xffu);
-    int dx, dy; /* deltas */
-    int dx2, dy2; /* (dx, dy)x2 */
-    int x_dir, y_dir; /* steps */
-    int err_flag;
-
-    /* Calc start address in back buffer (for draw start point) */
-    uint32_t* bbuf_start = g_back_buffer + x0 + y0 * scr_w;
-    /* Calc deltas */
-    dx = x1 - x0;
-    dy = y1 - y0;
-
-    if (dx >= 0) {
-        x_dir = 1; /* Line direction - right */
-    }
-    else {
-        x_dir = -1; /* left */
-        dx = -dx; /* need abs value */
-    }
-
-    if (dy >= 0) {
-        y_dir = scr_w; /* down */
-    }
-    else {
-        y_dir = -scr_w; /* up */
-        dy = -dy;
-    }
-
-    /* (dx, dy)x2 */
-    dx2 = dx << 1;
-    dy2 = dy << 1;
-
-    if (dx > dy) {
-        err_flag = dy2 - dx;
-
-        /* Draw line */
-        for (int i = 0; i <= dx; i++) {
-            /* draw pixel */
-            *bbuf_start = color_line;
-
-            /* Check error overflow */
-            if (err_flag >= 0) {
-                err_flag -= dx2;
-                /* next line */
-                bbuf_start += y_dir;
-            }
-
-            /*correct error */
-            err_flag += dy2;
-            /* go to next pixel */
-            bbuf_start += x_dir;
-        }
-    }
-    else {
-        err_flag = dx2 - dy;
-
-        /* draw line */
-        for (int i = 0; i <= dy; i++) {
-            /* draw pixel */
-            *bbuf_start = color_line;
-
-            /* Check error overflow */
-            if (err_flag >= 0) {
-                err_flag -= dy2;
-                /* next line */
-                bbuf_start += x_dir;
-            }
-
-            /*correct error */
-            err_flag += dx2;
-            /* go to next pixel */
-            bbuf_start += y_dir;
-        }
-    }
-
-
 
     while (1) {
 
@@ -117,6 +38,11 @@ int main(int argc, char* argv[])
                 }
             }
         } /* End of event handling */
+
+        draw_line(50, 20, 150, 200, GREEN);
+        draw_line_h(50, 150, 20, YELLOW);
+        draw_line_h(50, 150, 200, RED);
+        draw_line_v(50, 20, 200, BLACK);
 
         redraw_screen();
     }

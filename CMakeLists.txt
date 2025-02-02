@@ -18,6 +18,8 @@ add_executable(
     src/main.c
     src/hasty_graphic.c
     src/hasty_graphic.h
+    src/hasty_primitives.h
+    src/hasty_primitives.c
 )
 
 # Add SDL3
