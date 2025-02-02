@@ -92,7 +92,6 @@ void draw_line(int x0, int y0, int x1, int y1, uint32_t color)
 
 void draw_line_h(int x0, int x1, int y, uint32_t color)
 {
-
     /* Swap x0 and x1 for set correct endpoint */
     if (x1 < x0) {
         x0 += x1;
@@ -154,5 +153,54 @@ void draw_line_v(int x, int y0, int y1, uint32_t color)
     for (int i = y0; i <= y1; i++) {
         *bbuf_start = color;
         bbuf_start += g_width;
+    }
+}
+
+void draw_rect(rect* r, uint32_t color)
+{
+    int x_left = r->x;
+    int x_right = r->x + r->w;
+    int y_top = r->y;
+    int y_bottom = r->y + r->h;
+
+    /* Check if the rect is on the screen */
+    if (x_right < 0 || x_left >= g_width
+        || y_bottom < 0 || y_top >= g_height)
+        return;
+
+    draw_line_h(x_left, x_right, y_top, color);
+    draw_line_h(x_left, x_right, y_bottom, color);
+    draw_line_v(x_right, y_top, y_bottom, color);
+    draw_line_v(x_left, y_top, y_bottom, color);
+}
+
+void draw_rect_fill(rect* r, uint32_t color)
+{
+    int x_left = r->x;
+    int x_right = r->x + r->w;
+    int y_top = r->y;
+    int y_bottom = r->y + r->h;
+
+    /* Check if the rect is on the screen */
+    if (x_right < 0 || x_left >= g_width
+        || y_bottom < 0 || y_top >= g_height)
+        return;
+
+    /* Clip */
+    if (x_left < 0) x_left = 0;
+    if (y_top < 0) y_top = 0;
+    if (x_right >= g_width) x_right = g_width - 1;
+    if (y_bottom >= g_height) y_bottom = g_height - 1;
+
+    /* Fill */
+    uint32_t* bbuf_start;
+    for (int y = y_top; y <= y_bottom; y++) {
+
+        bbuf_start = g_back_buffer + x_left + y * g_width;
+
+        for (int x = x_left; x <= x_right; x++) {
+            *bbuf_start = color;
+            bbuf_start++;
+        }
     }
 }

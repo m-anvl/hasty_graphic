@@ -10,6 +10,8 @@ int main(int argc, char* argv[])
     int scr_w = 640;
     int scr_h = 480;
     SDL_Event event;
+    rect r = { 60, 30, 100, 180 };
+    rect r2 = { 150, 200, 600, 180 };
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
@@ -39,6 +41,7 @@ int main(int argc, char* argv[])
             }
         } /* End of event handling */
 
+        draw_rect_fill(&r, CYAN);
         draw_line(50, 20, 150, 200, GREEN);
         draw_line_h(50, 150, 20, YELLOW);
         draw_line_h(50, 150, 200, RED);
@@ -46,6 +49,11 @@ int main(int argc, char* argv[])
         draw_line_v(150, 20, 200, BLACK);
         draw_line_h(650, 40, 300, MAGENTA);
         draw_line_v(100, 500, 20, MAGENTA);
+
+        draw_rect(&r, WHITE);
+
+        draw_rect_fill(&r2, BLUE);
+        draw_rect(&r2, WHITE);
 
         redraw_screen();
     }
