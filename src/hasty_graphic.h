@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <SDL3/SDL.h>
-
-#define ERR_SDL(str) do { fprintf(stderr, "[%s:%d] %s error: %s\n",\
-                        __FILE__, __LINE__, #str, SDL_GetError()); } while(0)
 
 /* Colors defines */
 #define BLACK   0xff000000u
