@@ -1,9 +1,8 @@
 #include "hasty_graphic.h"
 #include "hasty_shapes.h"
+#include <SDL3/SDL.h>
 
 #define WND_TITLE "My application"
-
-extern uint32_t* g_back_buffer;
 
 int main(int argc, char* argv[])
 {
@@ -15,6 +14,7 @@ int main(int argc, char* argv[])
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
+    /* Main loop */
     while (1) {
 
         /* Event handling */
@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
             }
         } /* End of event handling */
 
+        /* Draw here */
         draw_rect_fill(&r, CYAN);
         draw_line(50, 20, 150, 200, GREEN);
         draw_line_h(50, 150, 20, YELLOW);
@@ -55,6 +56,7 @@ int main(int argc, char* argv[])
         draw_rect_fill(&r2, BLUE);
         draw_rect(&r2, WHITE);
 
+        /* Clear and redraw screen */
         redraw_screen();
     }
 

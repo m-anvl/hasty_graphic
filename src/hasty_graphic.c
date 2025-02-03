@@ -1,4 +1,9 @@
 #include "hasty_graphic.h"
+#include <SDL3/SDL.h>
+
+/* Error handle macro */
+#define ERR_SDL(str) do { fprintf(stderr, "[%s:%d] %s error: %s\n",\
+                        __FILE__, __LINE__, #str, SDL_GetError()); } while(0)
 
 SDL_Window* g_wnd;
 SDL_Renderer* g_rndr;
