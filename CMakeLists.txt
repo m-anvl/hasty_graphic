@@ -26,8 +26,6 @@ add_executable(
 
 # Add SDL3
 find_package(SDL3 REQUIRED)
-
-target_include_directories(${TRG_NAME} PUBLIC ${SDL3_INCLUDE_DIRS})
 target_link_libraries(${TRG_NAME} PRIVATE SDL3::SDL3)
 
 # Copies "SDL3.dll" to the directory where executable file is built

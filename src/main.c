@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 
         draw_rect_fill(&r2, BLUE);
         draw_rect(&r2, WHITE);
+        draw_line_h(0, scr_w, scr_h / 2, RED);
 
         /* Clear and redraw screen */
         redraw_screen();
