@@ -48,6 +48,8 @@ static void create_back_buffer(void)
         fprintf(stderr, "[%s:%d] Back buffer don\'t created\n", __FILE__, __LINE__);
         exit(EXIT_FAILURE);
     }
+
+    clear_back_buffer(BLACK);
 }
 
 void init_graphics(const char* wnd_title, int w, int h)
