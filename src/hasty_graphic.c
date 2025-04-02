@@ -102,6 +102,25 @@ void redraw_screen(void)
     SDL_RenderPresent(g_rndr);
 }
 
+void wait_quit_event(void)
+{
+    SDL_Event event;
+    for (;;) {
+        if (SDL_PollEvent(&event)) {
+
+            if (event.type == SDL_EVENT_QUIT)
+                break;
+
+            if (event.type == SDL_EVENT_KEY_DOWN) {
+                if (event.key.key == SDLK_ESCAPE) {
+                    break;
+                }
+            }
+        }
+        SDL_Delay(20);
+    }
+}
+
 void set_pixel(int x, int y, uint32_t color)
 {
     if (x >= g_width || y >= g_height || x < 0 || y < 0) {

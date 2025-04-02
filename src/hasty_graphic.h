@@ -27,6 +27,8 @@ extern "C" {
     void clear_back_buffer(uint32_t color);
     void redraw_screen(void);
 
+    void wait_quit_event(void);
+
     void set_pixel(int x, int y, uint32_t color);
 
     uint32_t pack_color_rgb(const uint8_t r, const uint8_t g,
