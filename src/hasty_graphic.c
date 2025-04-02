@@ -125,6 +125,10 @@ void wait_quit_event(void)
 
 void set_pixel(int x, int y, uint32_t color)
 {
+    /* Convert to screen coordinate system */
+    x = g_width / 2 + x;
+    y = g_height / 2 - y;
+
     if (x >= g_width || y >= g_height || x < 0 || y < 0) {
         return;
     }

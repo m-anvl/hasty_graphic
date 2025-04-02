@@ -14,8 +14,6 @@ add_executable(
     src/main.c
     src/hasty_graphic.c
     src/hasty_graphic.h
-    src/hasty_shapes.h
-    src/hasty_shapes.c
 )
 
 # Add SDL3
