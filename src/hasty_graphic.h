@@ -21,16 +21,19 @@
 extern "C" {
 #endif
 
-void init_graphics(const char* wnd_title, int w, int h);
-void shutdown_graphics(void);
+    void init_graphics(const char* wnd_title, int w, int h);
+    void shutdown_graphics(void);
 
-void clear_back_buffer(uint32_t color);
-void redraw_screen(void);
+    void clear_back_buffer(uint32_t color);
+    void redraw_screen(void);
 
-void set_pixel(int x, int y, uint32_t color);
+    void set_pixel(int x, int y, uint32_t color);
 
-uint32_t pack_color_rgb(const uint8_t r, const uint8_t g, const uint8_t b);
-uint32_t pack_color_rgba(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a);
+    uint32_t pack_color_rgb(const uint8_t r, const uint8_t g,
+        const uint8_t b /* const uint8_t a = 0xff */);
+
+    uint32_t pack_color_rgba(const uint8_t r, const uint8_t g,
+        const uint8_t b, const uint8_t a);
 
 #ifdef __cplusplus
 }

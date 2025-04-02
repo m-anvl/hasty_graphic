@@ -1,8 +1,4 @@
-#[[
-mkdir build
-cd build
-cmake ..
-]]
+# cmake -S . -B build
 
 cmake_minimum_required(VERSION 3.20)
 
@@ -20,8 +16,6 @@ add_executable(
     src/hasty_graphic.h
     src/hasty_shapes.h
     src/hasty_shapes.c
-    src/hasty_image.h
-    src/hasty_image.c
 )
 
 # Add SDL3
