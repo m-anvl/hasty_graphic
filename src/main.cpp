@@ -2,15 +2,23 @@
 
 #define WND_TITLE "My application"
 
+struct vec3 {
+    float x = 0;
+    float y = 0;
+    float z = 0;
+
+    constexpr float dot_product(const vec3& v) { return x * v.x + y * v.y + z * v.z; };
+};
+
 int main(int argc, char* argv[])
 {
-    int scr_w = 640;
-    int scr_h = 480;
+    const int scr_w = 640;
+    const int scr_h = 480;
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
     /* Draw here */
-    set_pixel(0, 0, RED);
+    set_pixel(scr_w / 2, scr_h / 2, RED);
 
     /* Clear and redraw screen */
     redraw_screen();
