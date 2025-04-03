@@ -4,17 +4,21 @@ cmake_minimum_required(VERSION 3.20)
 
 project(
     hasty_graphic
-    LANGUAGES C
+    LANGUAGES C CXX
 )
 
 set(TRG_NAME ${PROJECT_NAME})
 
 add_executable(
     ${TRG_NAME}
-    src/main.c
+    src/main.cpp
     src/hasty_graphic.c
     src/hasty_graphic.h
 )
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Add SDL3
 find_package(SDL3 REQUIRED)
