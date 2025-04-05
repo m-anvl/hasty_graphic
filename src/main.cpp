@@ -1,12 +1,10 @@
+#define _USE_MATH_DEFINES
 #include "hasty_graphic.h"
 #include <vector>
 #include <cassert>
 #include <algorithm>
 #include <limits>
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#define WND_TITLE "My application"
+#include <cmath>
 
 extern "C" {
     extern uint32_t* g_back_buffer;
@@ -25,7 +23,7 @@ struct vec3 {
     float operator*(const vec3& v)  const { return x * v.x + y * v.y + z * v.z; }
 
     float norm() const { return sqrtf(x * x + y * y + z * z); }
-    vec3 normalised() const { return (*this) * (1.0f / norm()); }
+    vec3 normalize() const { return (*this) * (1.0f / norm()); }
 
     uint32_t pack_color_rgb()
     {
@@ -119,13 +117,13 @@ bool scene_intresect(const vec3& origin, const vec3& dir,
         if (ray_intresect_sphere(s, origin, dir, dist_i) && dist_i < spheres_dist) {
             spheres_dist = dist_i;
             hit = origin + dir * dist_i;
-            N = (hit - s.center_).normalised();
+            N = (hit - s.center_).normalize();
             mat = s.material_;
         }
     }
 
     float checkerboard_dist = std::numeric_limits<float>::max();
-    if (fabs(static_cast<double>(dir.y)) > 1e-3) {
+    if (fabs(dir.y) > 1e-3f) {
         float d = -(origin.y + 4.0f) / dir.y;
         vec3 pt = origin + dir * d;
 
@@ -155,11 +153,11 @@ vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& sp
         return vec3{ 0.2f, 0.7f, 0.8f };
     }
 
-    vec3 reflect_dir = reflect(dir, N).normalised();
+    vec3 reflect_dir = reflect(dir, N).normalize();
     vec3 reflect_origin = reflect_dir * N < 0.0f ? point - N * 1e-3 : point + N * 1e-3;
     vec3 reflect_color = ray_cast(reflect_origin, reflect_dir, spheres, lights, depth + 1);
 
-    vec3 refract_dir = refract(dir, N, mat.refractive_index_).normalised();
+    vec3 refract_dir = refract(dir, N, mat.refractive_index_).normalize();
     vec3 refract_origin = refract_dir * N < 0.0f ? point - N * 1e-3 : point + N * 1e-3;
     vec3 refract_color = ray_cast(refract_origin, refract_dir, spheres, lights, depth + 1);
 
@@ -167,7 +165,7 @@ vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& sp
     float specular_light_intensity = 0.0f;
 
     for (light l : lights) {
-        vec3 light_dir = (l.position_ - point).normalised();
+        vec3 light_dir = (l.position_ - point).normalize();
         float light_dist = (l.position_ - point).norm();
         vec3 shadow_origin = light_dir * N < 0.0f ? point - N * 1e-3 : point + N * 1e-3;
         vec3 shadow_pt, shadow_N;
@@ -200,7 +198,7 @@ void render(const std::vector<sphere>& spheres, const std::vector<light> lights,
         for (size_t i = 0; i < w; ++i) {
             float x = (2 * (i + 0.5f) / (float)w - 1) * tanf(fov * 0.5f) * w / (float)h;
             float y = -(2 * (j + 0.5f) / (float)h - 1) * tanf(fov * 0.5f);
-            vec3 dir = vec3{ x, y, -1 }.normalised();
+            vec3 dir = vec3{ x, y, -1 }.normalize();
             framebuffer[i + j * w] = ray_cast(vec3{ 0,0,0 }, dir, spheres, lights);
         }
     }
@@ -215,10 +213,10 @@ void render(const std::vector<sphere>& spheres, const std::vector<light> lights,
 
 int main(int argc, char* argv[])
 {
-    constexpr int scr_w = 640;
-    constexpr int scr_h = 480;
+    constexpr int scr_w = 1024;
+    constexpr int scr_h = 768;
 
-    init_graphics(WND_TITLE, scr_w, scr_h);
+    init_graphics("Raytrace", scr_w, scr_h);
 
     constexpr material red_rubber = { { 0.3f, 0.1f, 0.1f }, { 0.9f, 0.1f, 0.1f, 0.0f }, 50.0f, 1.0f };
     constexpr material ivory = { { 0.4f, 0.4f, 0.3f }, { 0.6f, 0.3f, 0.0f, 0.0f }, 10.0f, 1.0f };
