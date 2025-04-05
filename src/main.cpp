@@ -106,11 +106,33 @@ vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& sp
     return mat.diffuse_color_;
 }
 
+void render(const std::vector<sphere>& spheres, const int w, const int h)
+{
+    constexpr int fov = M_PI / 2.0;
+
+    /* Make ray trace */
+    std::vector<vec3> framebuffer(w * h);
+    for (size_t i = 0; i < w; ++i) {
+        for (size_t j = 0; j < h; ++j) {
+            float x = (2 * (i + 0.5f) / (float)w - 1) * tanf(fov * 0.5f) * w / (float)h;
+            float y = -(2 * (j + 0.5f) / (float)h - 1) * tanf(fov * 0.5f);
+            vec3 dir = vec3{ x, y, -1 }.normalised();
+            framebuffer[i + j * w] = ray_cast(vec3{ 0,0,0 }, dir, spheres);
+        }
+    }
+
+    /* Copy from framebuffer to g_back_buffer */
+    for (size_t i = 0; i < w; ++i) {
+        for (size_t j = 0; j < h; ++j) {
+            g_back_buffer[i + j * w] = framebuffer[i + j * w].pack_color_rgb();
+        }
+    }
+}
+
 int main(int argc, char* argv[])
 {
     constexpr int scr_w = 640;
     constexpr int scr_h = 480;
-    constexpr int fov = M_PI / 2.0;
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
@@ -123,24 +145,7 @@ int main(int argc, char* argv[])
     spheres.push_back(sphere(vec3{ 1.5f, -0.5f, -18.0f }, 3.0f, red_rubber));
     spheres.push_back(sphere(vec3{ 7.0f,  5.0f, -18.0f }, 4.0f, ivory));
 
-
-    /* Make ray trace */
-    std::vector<vec3> framebuffer(scr_w * scr_h);
-    for (size_t i = 0; i < scr_w; ++i) {
-        for (size_t j = 0; j < scr_h; ++j) {
-            float x = (2 * (i + 0.5f) / (float)scr_w - 1) * tanf(fov * 0.5f) * scr_w / (float)scr_h;
-            float y = -(2 * (j + 0.5f) / (float)scr_h - 1) * tanf(fov * 0.5f);
-            vec3 dir = vec3{ x, y, -1 }.normalised();
-            framebuffer[i + j * scr_w] = ray_cast(vec3{ 0,0,0 }, dir, spheres);
-        }
-    }
-
-    /* Copy from framebuffer to g_back_buffer */
-    for (size_t i = 0; i < scr_w; ++i) {
-        for (size_t j = 0; j < scr_h; ++j) {
-            g_back_buffer[i + j * scr_w] = framebuffer[i + j * scr_w].pack_color_rgb();
-        }
-    }
+    render(spheres, scr_w, scr_h);
 
     /* Clear and redraw screen */
     redraw_screen();
