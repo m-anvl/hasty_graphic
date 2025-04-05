@@ -40,7 +40,7 @@ struct vec3 {
 
 struct material {
     vec3 diffuse_color_ = { 0.0f, 0.0f, 0.0f };
-    float albedo_[2] = { 2.0f, 0.0f };
+    float albedo_[3] = { 2.0f, 0.0f, 0.0f };
     float specular_exponent_ = 0.0f;
 };
 
@@ -106,14 +106,18 @@ bool scene_intresect(const vec3& origin, const vec3& dir,
     return spheres_dist < 1000.0f;
 }
 
-vec3 ray_cast(const vec3& origin, const vec3& dir,
-    const std::vector<sphere>& spheres, const std::vector<light> lights)
+vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& spheres,
+    const std::vector<light> lights, size_t depth = 0)
 {
     vec3 point, N;
     material mat;
-    if (!scene_intresect(origin, dir, spheres, point, N, mat)) {
+    if (depth > 4 || !scene_intresect(origin, dir, spheres, point, N, mat)) {
         return vec3{ 0.2f, 0.7f, 0.8f };
     }
+
+    vec3 reflect_dir = reflect(dir, N).normalised();
+    vec3 reflect_origin = reflect_dir * N < 0.0f ? point - N * 1e-3 : point + N * 1e-3;
+    vec3 reflect_color = ray_cast(reflect_origin, reflect_dir, spheres, lights, depth + 1);
 
     float diffuse_light_intensity = 0.0f;
     float specular_light_intensity = 0.0f;
@@ -136,8 +140,9 @@ vec3 ray_cast(const vec3& origin, const vec3& dir,
             mat.specular_exponent_) * l.intensity_;
     }
 
-    return mat.diffuse_color_ * diffuse_light_intensity * mat.albedo_[0] +
-        vec3{ 1.0f, 1.0f, 1.0f } *specular_light_intensity * mat.albedo_[1];
+    return mat.diffuse_color_ * diffuse_light_intensity * mat.albedo_[0]
+        + vec3{ 1.0f, 1.0f, 1.0f } *specular_light_intensity * mat.albedo_[1]
+        + reflect_color * mat.albedo_[2];
 }
 
 void render(const std::vector<sphere>& spheres, const std::vector<light> lights,
@@ -171,14 +176,15 @@ int main(int argc, char* argv[])
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
-    constexpr material red_rubber = { { 0.3f, 0.1f, 0.1f }, { 0.9f, 0.1f }, 50.0f };
-    constexpr material ivory = { { 0.4f, 0.4f, 0.3f }, { 0.6f, 0.3f }, 10.0f };
+    constexpr material red_rubber = { { 0.3f, 0.1f, 0.1f }, { 0.9f, 0.1f, 0.1f }, 50.0f };
+    constexpr material ivory = { { 0.4f, 0.4f, 0.3f }, { 0.6f, 0.3f, 0.0f }, 10.0f };
+    constexpr material mirror = { { 1.0f, 1.0f, 1.0f }, { 0.0f, 10.0f, 0.8f }, 1425.0f };
 
     std::vector<sphere> spheres;
     spheres.push_back(sphere(vec3{ -3.0f,  0.0f, -16.0f }, 2.0f, ivory));
-    spheres.push_back(sphere(vec3{ -1.0f, -1.5f, -12.0f }, 2.0f, red_rubber));
+    spheres.push_back(sphere(vec3{ -1.0f, -1.5f, -12.0f }, 2.0f, mirror));
     spheres.push_back(sphere(vec3{ 1.5f, -0.5f, -18.0f }, 3.0f, red_rubber));
-    spheres.push_back(sphere(vec3{ 7.0f,  5.0f, -18.0f }, 4.0f, ivory));
+    spheres.push_back(sphere(vec3{ 7.0f,  5.0f, -18.0f }, 4.0f, mirror));
 
     std::vector<light> lights;
     lights.push_back(light(vec3{ -20.0f, 20.0f, 20.0f }, 1.5f));
