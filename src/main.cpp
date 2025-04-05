@@ -18,10 +18,11 @@ struct vec3 {
     float z = 0.0f;
 
     constexpr float& operator[](const size_t i) { assert(i < 3); return i == 0 ? x : (i == 1 ? y : z); }
-    vec3 operator*(const float s) const { return { x * s, y * s, z * s }; }
-    vec3 operator+(const vec3& v) const { return { x + v.x, y + v.y, z + v.z }; }
-    vec3 operator-(const vec3& v) const { return { x - v.x, y - v.y, z - v.z }; }
-    float operator*(const vec3& v) const { return x * v.x + y * v.y + z * v.z; }
+    vec3 operator*(const float s)   const { return { x * s, y * s, z * s }; }
+    vec3 operator+(const vec3& v)   const { return { x + v.x, y + v.y, z + v.z }; }
+    vec3 operator-(const vec3& v)   const { return { x - v.x, y - v.y, z - v.z }; }
+    vec3 operator-()                const { return { -x, -y, -z }; }
+    float operator*(const vec3& v)  const { return x * v.x + y * v.y + z * v.z; }
 
     float norm() const { return sqrtf(x * x + y * y + z * z); }
     vec3 normalised() const { return (*this) * (1.0f / norm()); }
@@ -40,8 +41,9 @@ struct vec3 {
 
 struct material {
     vec3 diffuse_color_ = { 0.0f, 0.0f, 0.0f };
-    float albedo_[3] = { 2.0f, 0.0f, 0.0f };
+    float albedo_[4] = { 2.0f, 0.0f, 0.0f, 0.0f };
     float specular_exponent_ = 0.0f;
+    float refractive_index_ = 1.0f;
 };
 
 struct light {
@@ -87,6 +89,25 @@ bool ray_intresect_sphere(const sphere& s, const vec3& origin, const vec3& dir, 
     return true;
 }
 
+vec3 refract(const vec3& I, const vec3& N, const float& refractive_index)
+{
+    float cosi = -std::max(-1.0f, std::min(1.0f, I * N));
+    float etai = 1.0f;
+    float etat = refractive_index;
+    vec3 n = N;
+
+    if (cosi < 0.0f) {
+        cosi = -cosi;
+        std::swap(etai, etat);
+        n = -N;
+    }
+
+    float eta = etai / etat;
+    float k = 1 - eta * eta * (1.0f - cosi * cosi);
+
+    return k < 0 ? vec3{ 0.0f, 0.0f, 0.0f } : I * eta + n * (eta * cosi - sqrtf(k));
+}
+
 bool scene_intresect(const vec3& origin, const vec3& dir,
     const std::vector<sphere>& spheres, vec3& hit, vec3& N, material& mat)
 {
@@ -119,6 +140,10 @@ vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& sp
     vec3 reflect_origin = reflect_dir * N < 0.0f ? point - N * 1e-3 : point + N * 1e-3;
     vec3 reflect_color = ray_cast(reflect_origin, reflect_dir, spheres, lights, depth + 1);
 
+    vec3 refract_dir = refract(dir, N, mat.refractive_index_).normalised();
+    vec3 refract_origin = refract_dir * N < 0.0f ? point - N * 1e-3 : point + N * 1e-3;
+    vec3 refract_color = ray_cast(refract_origin, refract_dir, spheres, lights, depth + 1);
+
     float diffuse_light_intensity = 0.0f;
     float specular_light_intensity = 0.0f;
 
@@ -136,13 +161,13 @@ vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& sp
 
         diffuse_light_intensity += l.intensity_ * std::max(0.0f, light_dir * N);
         specular_light_intensity += powf(
-            std::max(0.0f, -(dir * (reflect(light_dir * (-1.0f), N)))),
+            std::max(0.0f, -(dir * (reflect(-light_dir, N)))),
             mat.specular_exponent_) * l.intensity_;
     }
 
     return mat.diffuse_color_ * diffuse_light_intensity * mat.albedo_[0]
         + vec3{ 1.0f, 1.0f, 1.0f } *specular_light_intensity * mat.albedo_[1]
-        + reflect_color * mat.albedo_[2];
+        + reflect_color * mat.albedo_[2] + refract_color * mat.albedo_[3];
 }
 
 void render(const std::vector<sphere>& spheres, const std::vector<light> lights,
@@ -176,13 +201,14 @@ int main(int argc, char* argv[])
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
-    constexpr material red_rubber = { { 0.3f, 0.1f, 0.1f }, { 0.9f, 0.1f, 0.1f }, 50.0f };
-    constexpr material ivory = { { 0.4f, 0.4f, 0.3f }, { 0.6f, 0.3f, 0.0f }, 10.0f };
-    constexpr material mirror = { { 1.0f, 1.0f, 1.0f }, { 0.0f, 10.0f, 0.8f }, 1425.0f };
+    constexpr material red_rubber = { { 0.3f, 0.1f, 0.1f }, { 0.9f, 0.1f, 0.1f, 0.0f }, 50.0f, 1.0f };
+    constexpr material ivory = { { 0.4f, 0.4f, 0.3f }, { 0.6f, 0.3f, 0.0f, 0.0f }, 10.0f, 1.0f };
+    constexpr material mirror = { { 1.0f, 1.0f, 1.0f }, { 0.0f, 10.0f, 0.8f, 0.0f }, 1425.0f, 1.0f };
+    constexpr material glass = { { 0.6f, 0.7f, 0.8f }, { 0.0f, 0.5f, 0.1f, 0.8f }, 125.0f, 1.5f };
 
     std::vector<sphere> spheres;
     spheres.push_back(sphere(vec3{ -3.0f,  0.0f, -16.0f }, 2.0f, ivory));
-    spheres.push_back(sphere(vec3{ -1.0f, -1.5f, -12.0f }, 2.0f, mirror));
+    spheres.push_back(sphere(vec3{ -1.0f, -1.5f, -12.0f }, 2.0f, glass));
     spheres.push_back(sphere(vec3{ 1.5f, -0.5f, -18.0f }, 3.0f, red_rubber));
     spheres.push_back(sphere(vec3{ 7.0f,  5.0f, -18.0f }, 4.0f, mirror));
 
