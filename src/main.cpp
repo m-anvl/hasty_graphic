@@ -120,6 +120,16 @@ vec3 ray_cast(const vec3& origin, const vec3& dir,
 
     for (light l : lights) {
         vec3 light_dir = (l.position_ - point).normalised();
+        float light_dist = (l.position_ - point).norm();
+        vec3 shadow_origin = light_dir * N < 0.0f ? point - N * 1e-3 : point + N * 1e-3;
+        vec3 shadow_pt, shadow_N;
+        material tmp_mat;
+
+        if (scene_intresect(shadow_origin, light_dir, spheres, shadow_pt, shadow_N, tmp_mat)
+            && (shadow_pt - shadow_origin).norm() < light_dist) {
+            continue;
+        }
+
         diffuse_light_intensity += l.intensity_ * std::max(0.0f, light_dir * N);
         specular_light_intensity += powf(
             std::max(0.0f, -(dir * (reflect(light_dir * (-1.0f), N)))),
