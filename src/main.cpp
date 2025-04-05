@@ -41,7 +41,7 @@ struct vec3 {
 
 struct material {
     vec3 diffuse_color_ = { 0.0f, 0.0f, 0.0f };
-    float albedo_[4] = { 2.0f, 0.0f, 0.0f, 0.0f };
+    float albedo_[4] = { 1.0f, 0.0f, 0.0f, 0.0f };
     float specular_exponent_ = 0.0f;
     float refractive_index_ = 1.0f;
 };
@@ -124,7 +124,26 @@ bool scene_intresect(const vec3& origin, const vec3& dir,
         }
     }
 
-    return spheres_dist < 1000.0f;
+    float checkerboard_dist = std::numeric_limits<float>::max();
+    if (fabs(static_cast<double>(dir.y)) > 1e-3) {
+        float d = -(origin.y + 4.0f) / dir.y;
+        vec3 pt = origin + dir * d;
+
+        if (d > 0.0f
+            && fabsf(pt.x) < 10.f
+            && pt.z < -10.0f
+            && pt.z > -30.0f
+            && d < spheres_dist) {
+            checkerboard_dist = d;
+            hit = pt;
+            N = vec3{ 0.0f, 1.0f, 0.0f };
+            mat.diffuse_color_ = (int(0.5f * hit.x + 1000) + int(0.5f * hit.z)) & 1
+                ? vec3{ 1.0f, 1.0f, 1.0f } : vec3{ 1.0f, 0.7f, 0.3f };
+            mat.diffuse_color_ = mat.diffuse_color_ * 0.3f;
+        }
+    }
+
+    return std::min(spheres_dist, checkerboard_dist) < 1000.0f;
 }
 
 vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& spheres,
@@ -177,8 +196,8 @@ void render(const std::vector<sphere>& spheres, const std::vector<light> lights,
 
     /* Make ray trace */
     std::vector<vec3> framebuffer(w * h);
-    for (size_t i = 0; i < w; ++i) {
-        for (size_t j = 0; j < h; ++j) {
+    for (size_t j = 0; j < h; ++j) {
+        for (size_t i = 0; i < w; ++i) {
             float x = (2 * (i + 0.5f) / (float)w - 1) * tanf(fov * 0.5f) * w / (float)h;
             float y = -(2 * (j + 0.5f) / (float)h - 1) * tanf(fov * 0.5f);
             vec3 dir = vec3{ x, y, -1 }.normalised();
