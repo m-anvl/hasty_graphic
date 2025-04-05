@@ -44,6 +44,12 @@ struct material {
     material() : diffuse_color_() { vec3 diffuse_color; }
 };
 
+struct light {
+    vec3 position_;
+    float intensity_;
+    light(const vec3& p, const float& i) : position_(p), intensity_(i) {}
+};
+
 struct sphere {
     vec3 center_;
     float radius_;
@@ -95,7 +101,8 @@ bool scene_intresect(const vec3& origin, const vec3& dir,
     return spheres_dist < 1000.0f;
 }
 
-vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& spheres)
+vec3 ray_cast(const vec3& origin, const vec3& dir,
+    const std::vector<sphere>& spheres, const std::vector<light> lights)
 {
     vec3 point, N;
     material mat;
@@ -103,10 +110,17 @@ vec3 ray_cast(const vec3& origin, const vec3& dir, const std::vector<sphere>& sp
         return vec3{ 0.2f, 0.7f, 0.8f };
     }
 
-    return mat.diffuse_color_;
+    float diffuse_light_intensity = 0.0f;
+    for (light l : lights) {
+        vec3 light_dir = (l.position_ - point).normalised();
+        diffuse_light_intensity += l.intensity_ * std::max(0.0f, light_dir * N);
+    }
+
+    return mat.diffuse_color_ * diffuse_light_intensity;
 }
 
-void render(const std::vector<sphere>& spheres, const int w, const int h)
+void render(const std::vector<sphere>& spheres, const std::vector<light> lights,
+    const int w, const int h)
 {
     constexpr int fov = M_PI / 2.0;
 
@@ -117,7 +131,7 @@ void render(const std::vector<sphere>& spheres, const int w, const int h)
             float x = (2 * (i + 0.5f) / (float)w - 1) * tanf(fov * 0.5f) * w / (float)h;
             float y = -(2 * (j + 0.5f) / (float)h - 1) * tanf(fov * 0.5f);
             vec3 dir = vec3{ x, y, -1 }.normalised();
-            framebuffer[i + j * w] = ray_cast(vec3{ 0,0,0 }, dir, spheres);
+            framebuffer[i + j * w] = ray_cast(vec3{ 0,0,0 }, dir, spheres, lights);
         }
     }
 
@@ -145,7 +159,10 @@ int main(int argc, char* argv[])
     spheres.push_back(sphere(vec3{ 1.5f, -0.5f, -18.0f }, 3.0f, red_rubber));
     spheres.push_back(sphere(vec3{ 7.0f,  5.0f, -18.0f }, 4.0f, ivory));
 
-    render(spheres, scr_w, scr_h);
+    std::vector<light> lights;
+    lights.push_back(light(vec3{ -20.0f ,20.0f, 20.0f }, 1.5f));
+
+    render(spheres, lights, scr_w, scr_h);
 
     /* Clear and redraw screen */
     redraw_screen();
