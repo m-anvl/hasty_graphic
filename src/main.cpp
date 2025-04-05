@@ -39,9 +39,9 @@ struct vec3 {
 };
 
 struct material {
-    vec3 diffuse_color_;
-    material(const vec3& color) : diffuse_color_(color) {}
-    material() : diffuse_color_() { vec3 diffuse_color; }
+    vec3 diffuse_color_ = { 0.0f, 0.0f, 0.0f };
+    float albedo_[2] = { 2.0f, 0.0f };
+    float specular_exponent_ = 0.0f;
 };
 
 struct light {
@@ -58,6 +58,11 @@ struct sphere {
     sphere(const vec3& c, const float& r, const material& m) :
         center_(c), radius_(r), material_(m) {}
 };
+
+vec3 reflect(const vec3& I, const vec3& N)
+{
+    return I - N * 2.0f * (I * N);
+}
 
 bool ray_intresect_sphere(const sphere& s, const vec3& origin, const vec3& dir, float& t0)
 {
@@ -111,12 +116,18 @@ vec3 ray_cast(const vec3& origin, const vec3& dir,
     }
 
     float diffuse_light_intensity = 0.0f;
+    float specular_light_intensity = 0.0f;
+
     for (light l : lights) {
         vec3 light_dir = (l.position_ - point).normalised();
         diffuse_light_intensity += l.intensity_ * std::max(0.0f, light_dir * N);
+        specular_light_intensity += powf(
+            std::max(0.0f, -(dir * (reflect(light_dir * (-1.0f), N)))),
+            mat.specular_exponent_) * l.intensity_;
     }
 
-    return mat.diffuse_color_ * diffuse_light_intensity;
+    return mat.diffuse_color_ * diffuse_light_intensity * mat.albedo_[0] +
+        vec3{ 1.0f, 1.0f, 1.0f } *specular_light_intensity * mat.albedo_[1];
 }
 
 void render(const std::vector<sphere>& spheres, const std::vector<light> lights,
@@ -150,8 +161,8 @@ int main(int argc, char* argv[])
 
     init_graphics(WND_TITLE, scr_w, scr_h);
 
-    material red_rubber(vec3{ 0.3f, 0.1f, 0.1f });
-    material ivory(vec3{ 0.4f, 0.4f, 0.3f });
+    constexpr material red_rubber = { { 0.3f, 0.1f, 0.1f }, { 0.9f, 0.1f }, 50.0f };
+    constexpr material ivory = { { 0.4f, 0.4f, 0.3f }, { 0.6f, 0.3f }, 10.0f };
 
     std::vector<sphere> spheres;
     spheres.push_back(sphere(vec3{ -3.0f,  0.0f, -16.0f }, 2.0f, ivory));
@@ -160,7 +171,9 @@ int main(int argc, char* argv[])
     spheres.push_back(sphere(vec3{ 7.0f,  5.0f, -18.0f }, 4.0f, ivory));
 
     std::vector<light> lights;
-    lights.push_back(light(vec3{ -20.0f ,20.0f, 20.0f }, 1.5f));
+    lights.push_back(light(vec3{ -20.0f, 20.0f, 20.0f }, 1.5f));
+    lights.push_back(light(vec3{ 30.0f, 50.0f, -25.0f }, 1.8f));
+    lights.push_back(light(vec3{ 30.0f, 20.0f, 30.0f }, 1.7f));
 
     render(spheres, lights, scr_w, scr_h);
 
